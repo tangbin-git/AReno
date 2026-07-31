@@ -543,6 +543,41 @@ game loop.
           :alt: Gemma-E2B-it after DuelGrid training
           :width: 260px
 
+Agentic Battleship
+~~~~~~~~~~~~~~~~~~
+
+Battleship is a partial-observability grid game. A hidden fleet of four ships
+(``[4, 3, 2, 2]``, 11 cells) is seeded on an 8×8 grid. The policy calls
+``fire(coordinate)`` once per turn and receives ``miss``, ``hit``, or ``sunk``
+feedback. Ship cells are never revealed. The game ends when all ships are sunk
+or the 48-shot turn cap is reached.
+
+.. code-block:: bash
+
+   python examples/agentic/battleship/dataset_generator.py \
+     --output /tmp/battleship.jsonl \
+     --count 256 \
+     --seed 2026
+
+   areno train \
+     --ckpt Qwen/Qwen3-0.6B \
+     --dataset-path /tmp/battleship.jsonl \
+     --dataset-loader-fn examples/agentic/battleship/dataset_loader.py \
+     --reward-fn-path examples/agentic/battleship/reward.py \
+     --agent-fn examples/agentic/battleship/run_agent.py \
+     --algo gspo \
+     --tp-size 1 \
+     --world-size 1
+
+Evaluate a trained policy against a random baseline:
+
+.. code-block:: bash
+
+   python examples/agentic/battleship/evaluate.py \
+     --count 64 --seed 2026 \
+     --base-url http://127.0.0.1:8000/v1 \
+     --api-key token
+
 Help
 ----
 
